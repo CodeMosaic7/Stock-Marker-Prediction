@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import styles from "../styles";
 const StockData = () => {
   const [symbol, setSymbol] = useState('AAPL');
   const [interval, setInterval] = useState('5min');

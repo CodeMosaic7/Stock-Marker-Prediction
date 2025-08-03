@@ -5,6 +5,8 @@ import Predictions from "./pages/Predictions";
 import StockData from "./pages/StockData";
 import TrainModel from "./pages/Train";
 import ModelInfo from "./pages/ModelInfo";
+import styles from './styles.js';
+import './index.css';
 const App = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
 

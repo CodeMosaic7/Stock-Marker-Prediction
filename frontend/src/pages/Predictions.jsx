@@ -1,4 +1,4 @@
-import { styles } from "../styles";
+import  styles  from "../styles.js";
 import { useState } from "react";
 const Predictions = () => {
   const [symbol, setSymbol] = useState('AAPL');

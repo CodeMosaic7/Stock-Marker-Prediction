@@ -6,10 +6,12 @@ const Dashboard = () => {
   const [healthData, setHealthData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+// api function
   useEffect(() => {
     fetchHealthData();
   }, []);
 
+  // pass this to api page
   const fetchHealthData = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/health`);
@@ -27,7 +29,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      <h1 style={{fontSize: '32px', marginBottom: '30px', textAlign: 'center'}}>
+      <h1 style={{fontSize: '40px', marginBottom: '30px', textAlign: 'center', color:"whitesmoke", fontWeight: 'bold'}}>
         Stock Prediction Dashboard
       </h1>
       

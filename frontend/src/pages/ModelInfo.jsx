@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { styles } from "../styles";
+import { useState,useEffect } from "react";
+import styles from "../styles";
+import { Brain, Settings, Database } from 'lucide-react';
 
 const ModelInfo = () => {
   const [modelInfo, setModelInfo] = useState(null);

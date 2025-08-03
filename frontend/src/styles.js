@@ -1,7 +1,7 @@
 const styles = {
   app: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(135deg, #667eea 0%,rgb(217, 175, 255) 100%)',
     fontFamily: 'Arial, sans-serif',
     color: '#fff'
   },
@@ -50,13 +50,18 @@ const styles = {
     minHeight: '100vh'
   },
   card: {
-    background: 'rgba(255, 255, 255, 0.1)',
+    background: 'rgba(255, 219, 219, 0.1)',
     backdropFilter: 'blur(10px)',
     borderRadius: '20px',
     padding: '30px',
     margin: '20px 0',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+    border: '2px solid rgba(255, 255, 255, 0.2)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+    color: '#fff',
+    fontSize: '18px',
+    lineHeight: '1.6',
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
   },
   button: {
     background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
@@ -116,8 +121,9 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
     gap: '20px',
-    marginTop: '20px'
+    padding: '20px',   
   },
+
   loading: {
     display: 'flex',
     justifyContent: 'center',

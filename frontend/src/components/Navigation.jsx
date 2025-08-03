@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from '../styles.js';
-
+import { Home, BarChart3, Brain, TrendingUp, Info, Activity } from 'lucide-react';
 
 const Navigation = ({ currentPage, setCurrentPage }) => {
   const [hoveredItem, setHoveredItem] = useState(null);
