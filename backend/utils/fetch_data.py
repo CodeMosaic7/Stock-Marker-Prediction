@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
+api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
 def fetch_stock_data(api_key, symbol="AAPL", interval="5min"):
     """
     Fetch intraday stock data from Alpha Vantage API
@@ -21,14 +22,13 @@ def fetch_stock_data(api_key, symbol="AAPL", interval="5min"):
         'symbol': symbol,
         'interval': interval,
         'apikey': api_key,
-        'outputsize': 'full',  # get more historical data
+        'outputsize': 'full', 
         'datatype': 'json'
     }
     
     response = requests.get(url, params=params)
     data = response.json()
     
-    # Better error handling
     if 'Error Message' in data:
         raise Exception(f"API Error: {data['Error Message']}")
     
@@ -47,6 +47,6 @@ def process_data(data):
     df.columns = [col.split('. ')[1] for col in df.columns]  # Clean column names
     df.index = pd.to_datetime(df.index)
     df = df.sort_index()
-    # Convert data to numeric
+    
     df = df.apply(pd.to_numeric)
     return df
