@@ -1,8 +1,11 @@
 import os
-import aiohttp
+import httpx
 from fastapi import HTTPException
+
 import tensorflow as tf
-import joblib   
+import joblib  
+# from backend.main import model_cache, scaler_cache, feature_cache 
+
 async def get_api_key():
     """Get API key from environment"""
     api_key = os.getenv("ALPHA_VANTAGE_API_KEY")

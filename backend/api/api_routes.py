@@ -1,20 +1,26 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import APIRouter
+
 from pathlib import Path
-from typing import Optional, List, Dict
-import logging
+from typing import Optional
 import joblib
-from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime,timedelta
 import os
-import numpy as np
 from dotenv import load_dotenv
-from backend.utils.fetch_data import fetch_stock_data, process_data
-from backend.api.schemas import StockDataResponse, TrainRequest, PredictionRequest, PredictionResponse
-from sklearn.preprocessing import MinMaxScaler
-from backend.main import app
+
+from backend.utils.fetch_data import process_data
+from backend.api.schemas import  TrainingRequest, PredictionRequest, PredictionResponse
+from backend.api.api_logic import fetch_stock_data_async, get_api_key, load_model_artifacts
+
+from backend.model.LSTM import build_lstm_model
+from backend.model.feature_engineering import prepare_lstm_data
+from backend.model.train_model import train_model
+from backend.model.evaluate_model import evaluate_model,save_model_artifacts
+from backend.model.feature_engineering import create_technical_indicators
+
+from backend.main import app,logger, training_status, model_cache, scaler_cache, feature_cache
+
 load_dotenv()
 
 API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")

@@ -24,7 +24,7 @@ A full-stack web application that predicts stock prices using a trained LSTM mod
 | Backend API  | FastAPI (Python)  |
 | ML Model     | LSTM (TensorFlow/Keras) |
 | Data Source  | Alpha Vantage API |
-| Deployment   | (Optional: Vercel + Railway/Render) |
+| Deployment   | (Vercel + Railway/Render) |
 
 ---
 

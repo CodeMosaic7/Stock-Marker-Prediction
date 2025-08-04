@@ -1,4 +1,5 @@
 import requests
+import logging
 import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -7,6 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.api import api_routes
 from dotenv import load_dotenv
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 app = FastAPI(
     title="Stock Prediction API",
@@ -30,7 +35,6 @@ model_cache = {}
 scaler_cache = {}
 feature_cache = {}
 training_status = {}
-
 
 # Base URL for your API
 BASE_URL = "http://localhost:8000"
