@@ -1,5 +1,4 @@
 from fastapi import HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
 from fastapi import APIRouter
 
 from pathlib import Path
@@ -20,7 +19,7 @@ from model.evaluate_model import evaluate_model,save_model_artifacts
 from model.feature_engineering import create_technical_indicators
 from model.predict import predict_future_prices
 
-from core.config import app,logger, training_status, model_cache, scaler_cache, feature_cache
+from core.config import logger, training_status, model_cache, scaler_cache, feature_cache
 
 load_dotenv()
 
@@ -29,7 +28,7 @@ API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 # route from main routes to here
 router=APIRouter(prefix="/api", tags=["API"])
 
-@router.get("/")
+@router.get("/")#tested
 async def root():
     """API health check"""
     return {
@@ -46,9 +45,9 @@ async def root():
         ]
     }
 
-@router.get("/stock-data/{symbol}")
+@router.get("/stock-data/{symbol}")#tested
 async def get_stock_data(
-    symbol: str,
+    symbol: str="IBM",#will be replaced with a default symbol
     interval: str = "5min",
     limit: Optional[int] = 100
 ):
@@ -86,7 +85,7 @@ async def get_stock_data(
         logger.error(f"Error fetching stock data: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/train")
+@router.post("/train")#tested
 async def train_model_endpoint(
     request: TrainingRequest,
     background_tasks: BackgroundTasks
@@ -111,7 +110,7 @@ async def train_model_endpoint(
         "completed_at": None
     }
     
-    # Start background training
+    
     background_tasks.add_task(
         train_model_background,
         symbol,
@@ -137,20 +136,19 @@ async def train_model_background(
 ):
     """Background task for model training"""
     try:
-        # Update status
         training_status[symbol]["message"] = "Fetching data..."
         training_status[symbol]["progress"] = 10.0
         
-        # Get API key and fetch data
+    
         api_key = await get_api_key()
         raw_data = await fetch_stock_data_async(symbol, interval, api_key)
         df = process_data(raw_data)
         
-        # Update status
+      
         training_status[symbol]["message"] = "Creating technical indicators..."
         training_status[symbol]["progress"] = 25.0
         
-        # Add technical indicators
+        
         df = create_technical_indicators(df)
         
         # Update status
@@ -166,34 +164,31 @@ async def train_model_background(
         training_status[symbol]["message"] = "Building model..."
         training_status[symbol]["progress"] = 50.0
         
-        # Build model
+        
         model = build_lstm_model(
             input_shape=(X_train.shape[1], X_train.shape[2]),
             prediction_horizon=prediction_horizon
         )
         
-        # Update status
+       
         training_status[symbol]["message"] = "Training model..."
         training_status[symbol]["progress"] = 60.0
         
-        # Train model
+        
         history, model_dir = train_model(
             model, X_train, y_train, X_test, y_test, symbol, epochs=epochs
         )
         
-        # Update status
+        
         training_status[symbol]["message"] = "Evaluating model..."
         training_status[symbol]["progress"] = 90.0
         
-        # Evaluate model
         metrics, pred_prices, actual_prices = evaluate_model(
             model, X_test, y_test, scaler, feature_columns
         )
         
-        # Save model artifacts
         save_model_artifacts(model, scaler, feature_columns, metrics, symbol, model_dir)
         
-        # Clear cache to force reload
         cache_key = symbol
         if cache_key in model_cache:
             del model_cache[cache_key]
@@ -208,7 +203,8 @@ async def train_model_background(
             "completed_at": datetime.now().isoformat(),
             "metrics": metrics
         })
-        
+        print(f"Training completed for {symbol}")
+        print("Training status:", training_status[symbol]   )
     except Exception as e:
         logger.error(f"Training failed for {symbol}: {str(e)}")
         training_status[symbol].update({
@@ -221,6 +217,7 @@ async def train_model_background(
 async def get_training_status(symbol: str):
     """Get training status for a symbol"""
     symbol = symbol.upper()
+    print("DEBUG",training_status)
     if symbol not in training_status:
         raise HTTPException(
             status_code=404,
@@ -319,7 +316,7 @@ async def list_available_models():
     
     return {"models": available_models}
 
-@router.delete("/models/{symbol}")
+@router.delete("/models/{symbol}")#tested
 async def delete_model(symbol: str):
     """Delete a trained model"""
     symbol = symbol.upper()
@@ -355,7 +352,7 @@ async def delete_model(symbol: str):
             detail=f"Error deleting model: {str(e)}"
         )
 
-@router.get("/health")
+@router.get("/health")#tested
 async def health_check():
     """Detailed health check"""
     return {

@@ -3,7 +3,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCh
 def train_model(model, X_train, y_train, X_test, y_test, symbol, epochs=100):
     """Train the LSTM model with callbacks"""
     # Create model directory
-    model_dir = f"models/{symbol}"
+    model_dir = f"LSTM_models/{symbol}"
     os.makedirs(model_dir, exist_ok=True)
     
     # Callbacks
