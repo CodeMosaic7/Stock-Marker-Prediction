@@ -4,7 +4,7 @@ from fastapi import HTTPException
 
 import tensorflow as tf
 import joblib  
-# from backend.main import model_cache, scaler_cache, feature_cache 
+from core.config import model_cache, scaler_cache, feature_cache 
 
 async def get_api_key():
     """Get API key from environment"""
@@ -27,7 +27,7 @@ def load_model_artifacts(symbol: str):
         )
     
     try:
-        # Check cache first
+        
         cache_key = symbol
         if cache_key in model_cache:
             return model_cache[cache_key], scaler_cache[cache_key], feature_cache[cache_key]
@@ -62,20 +62,21 @@ async def fetch_stock_data_async(symbol: str, interval: str, api_key: str):
         'datatype': 'json'
     }
     
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, params=params) as response:
-            data = await response.json()
-            
-            if 'Error Message' in data:
-                raise HTTPException(status_code=400, detail=f"API Error: {data['Error Message']}")
-            if 'Note' in data:
-                raise HTTPException(status_code=429, detail=f"API Rate Limit: {data['Note']}")
-            
-            time_series_key = f'Time Series ({interval})'
-            if time_series_key not in data:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to fetch data. Available keys: {list(data.keys())}"
-                )
-            
-            return data[time_series_key]
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params)
+        data = response.json()
+        print("DEBUG: Fetched data:", data)  # Debugging line
+        if 'Error Message' in data:
+            raise HTTPException(status_code=400, detail=f"API Error: {data['Error Message']}")
+        
+        if 'Note' in data:
+            raise HTTPException(status_code=429, detail=f"API Rate Limit: {data['Note']}")
+        
+        time_series_key = f'Time Series ({interval})'
+        if time_series_key not in data:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to fetch data. Available keys: {list(data.keys())}"
+            )
+        
+        return data[time_series_key]

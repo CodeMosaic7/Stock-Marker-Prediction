@@ -9,26 +9,27 @@ from datetime import datetime,timedelta
 import os
 from dotenv import load_dotenv
 
-from backend.utils.fetch_data import process_data
-from backend.api.schemas import  TrainingRequest, PredictionRequest, PredictionResponse
-from backend.api.api_logic import fetch_stock_data_async, get_api_key, load_model_artifacts
+from utils.fetch_data import process_data
+from api.schemas import  TrainingRequest, PredictionRequest, PredictionResponse
+from api.api_logic import fetch_stock_data_async, get_api_key, load_model_artifacts
 
-from backend.model.LSTM import build_lstm_model
-from backend.model.feature_engineering import prepare_lstm_data
-from backend.model.train_model import train_model
-from backend.model.evaluate_model import evaluate_model,save_model_artifacts
-from backend.model.feature_engineering import create_technical_indicators
+from model.LSTM import build_lstm_model
+from model.feature_engineering import prepare_lstm_data
+from model.train_model import train_model
+from model.evaluate_model import evaluate_model,save_model_artifacts
+from model.feature_engineering import create_technical_indicators
+from model.predict import predict_future_prices
 
-from backend.main import app,logger, training_status, model_cache, scaler_cache, feature_cache
+from core.config import app,logger, training_status, model_cache, scaler_cache, feature_cache
 
 load_dotenv()
 
 API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 
 # route from main routes to here
-api_routes=APIRouter(prefix="/api", tags=["API"])
+router=APIRouter(prefix="/api", tags=["API"])
 
-@app.get("/")
+@router.get("/")
 async def root():
     """API health check"""
     return {
@@ -45,7 +46,7 @@ async def root():
         ]
     }
 
-@app.get("/stock-data/{symbol}")
+@router.get("/stock-data/{symbol}")
 async def get_stock_data(
     symbol: str,
     interval: str = "5min",
@@ -85,7 +86,7 @@ async def get_stock_data(
         logger.error(f"Error fetching stock data: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/train")
+@router.post("/train")
 async def train_model_endpoint(
     request: TrainingRequest,
     background_tasks: BackgroundTasks
@@ -216,7 +217,7 @@ async def train_model_background(
             "completed_at": datetime.now().isoformat()
         })
 
-@app.get("/training-status/{symbol}")
+@router.get("/training-status/{symbol}")
 async def get_training_status(symbol: str):
     """Get training status for a symbol"""
     symbol = symbol.upper()
@@ -228,7 +229,7 @@ async def get_training_status(symbol: str):
     
     return training_status[symbol]
 
-@app.post("/predict", response_model=PredictionResponse)
+@router.post("/predict", response_model=PredictionResponse)
 async def predict_prices(request: PredictionRequest):
     """Make price predictions using trained model"""
     try:
@@ -289,7 +290,7 @@ async def predict_prices(request: PredictionRequest):
         logger.error(f"Prediction error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/models")
+@router.get("/models")
 async def list_available_models():
     """List all available trained models"""
     models_dir = Path("models")
@@ -318,7 +319,7 @@ async def list_available_models():
     
     return {"models": available_models}
 
-@app.delete("/models/{symbol}")
+@router.delete("/models/{symbol}")
 async def delete_model(symbol: str):
     """Delete a trained model"""
     symbol = symbol.upper()
@@ -354,7 +355,7 @@ async def delete_model(symbol: str):
             detail=f"Error deleting model: {str(e)}"
         )
 
-@app.get("/health")
+@router.get("/health")
 async def health_check():
     """Detailed health check"""
     return {
@@ -366,29 +367,29 @@ async def health_check():
         "cache_size": len(model_cache)
     }
 
-# Error handlers
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error": exc.detail,
-            "status_code": exc.status_code,
-            "timestamp": datetime.now().isoformat()
-        }
-    )
+# # Error handlers
+# @router.exception_handler(HTTPException)
+# async def http_exception_handler(request, exc):
+#     return JSONResponse(
+#         status_code=exc.status_code,
+#         content={
+#             "error": exc.detail,
+#             "status_code": exc.status_code,
+#             "timestamp": datetime.now().isoformat()
+#         }
+#     )
 
-@app.exception_handler(Exception)
-async def general_exception_handler(request, exc):
-    logger.error(f"Unhandled exception: {str(exc)}")
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": "Internal server error",
-            "message": str(exc),
-            "timestamp": datetime.now().isoformat()
-        }
-    )
+# @router.exception_handler(Exception)
+# async def general_exception_handler(request, exc):
+#     logger.error(f"Unhandled exception: {str(exc)}")
+#     return JSONResponse(
+#         status_code=500,
+#         content={
+#             "error": "Internal server error",
+#             "message": str(exc),
+#             "timestamp": datetime.now().isoformat()
+#         }
+#     )
 
 if __name__ == "__main__":
     import uvicorn
