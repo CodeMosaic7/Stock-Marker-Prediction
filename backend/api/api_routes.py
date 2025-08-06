@@ -28,7 +28,7 @@ API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 # route from main routes to here
 router=APIRouter(prefix="/api", tags=["API"])
 
-@router.get("/")#tested
+@router.get("/")#tested-working
 async def root():
     """API health check"""
     return {
@@ -45,7 +45,7 @@ async def root():
         ]
     }
 
-@router.get("/stock-data/{symbol}")#tested
+@router.get("/stock-data/{symbol}")#tested-working
 async def get_stock_data(
     symbol: str="IBM",#will be replaced with a default symbol
     interval: str = "5min",
@@ -85,7 +85,7 @@ async def get_stock_data(
         logger.error(f"Error fetching stock data: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/train")#tested
+@router.post("/train")#tested-working
 async def train_model_endpoint(
     request: TrainingRequest,
     background_tasks: BackgroundTasks
@@ -93,7 +93,6 @@ async def train_model_endpoint(
     """Start training a new LSTM model"""
     symbol = request.symbol.upper()
     
-    # Check if already training
     if symbol in training_status and training_status[symbol]["status"] == "training":
         raise HTTPException(
             status_code=409,
@@ -213,7 +212,7 @@ async def train_model_background(
             "completed_at": datetime.now().isoformat()
         })
 
-@router.get("/training-status/{symbol}")
+@router.get("/training-status/{symbol}")#tested-working
 async def get_training_status(symbol: str):
     """Get training status for a symbol"""
     symbol = symbol.upper()
@@ -226,16 +225,17 @@ async def get_training_status(symbol: str):
     
     return training_status[symbol]
 
-@router.post("/predict", response_model=PredictionResponse)
+@router.post("/predict", response_model=PredictionResponse)#tested-working
 async def predict_prices(request: PredictionRequest):
     """Make price predictions using trained model"""
     try:
         symbol = request.symbol.upper()
+        print(symbol)
         
         # Load model artifacts
         model, scaler, feature_columns = load_model_artifacts(symbol)
         
-        # Get latest data if requested
+      
         if request.use_latest_data:
             api_key = await get_api_key()
             raw_data = await fetch_stock_data_async(symbol, "5min", api_key)
@@ -247,7 +247,7 @@ async def predict_prices(request: PredictionRequest):
             scaled_data = scaler.transform(df_clean.tail(60))  # Use last 60 points
             last_sequence = scaled_data
         else:
-            # Use dummy data (in real scenario, you'd load from database)
+            # Load historical data
             raise HTTPException(
                 status_code=400,
                 detail="Historical prediction not implemented. Use use_latest_data=true"
@@ -287,10 +287,10 @@ async def predict_prices(request: PredictionRequest):
         logger.error(f"Prediction error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/models")
+@router.get("/models")#tested-working
 async def list_available_models():
     """List all available trained models"""
-    models_dir = Path("models")
+    models_dir = Path("LSTM_models")
     if not models_dir.exists():
         return {"models": []}
     
@@ -352,7 +352,7 @@ async def delete_model(symbol: str):
             detail=f"Error deleting model: {str(e)}"
         )
 
-@router.get("/health")#tested
+@router.get("/health")#tested-working
 async def health_check():
     """Detailed health check"""
     return {

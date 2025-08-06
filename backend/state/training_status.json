@@ -1,0 +1,1 @@
+{"IBM": {"symbol": "IBM", "status": "completed", "progress": 100.0, "message": "Training completed successfully", "started_at": "2025-08-05T20:37:49.951824", "completed_at": "2025-08-05T20:45:57.118341", "metrics": {"MSE": 26.15088364095468, "MAE": 4.131284081424804, "RMSE": 5.11379346874262, "R2": -0.10194221268482728, "MAPE": 1.6420854165906125}}}

@@ -1,5 +1,5 @@
 // api/api.js
-import apiClient from '../config/axios';
+import apiClient from './config';
 
 
 export const getApiHealth = async () => {

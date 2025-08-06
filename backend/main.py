@@ -1,9 +1,11 @@
 
 from fastapi.middleware.cors import CORSMiddleware
 from api import api_routes
-from core.config import app
+from core.config import app,logger, training_status, model_cache, scaler_cache, feature_cache
 from core.state_manager import save_json,save_pickle
+import tensorflow as tf
 
+tf.config.set_visible_devices([], 'GPU')
 model = None
 scaler = None
 

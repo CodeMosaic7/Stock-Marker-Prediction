@@ -18,7 +18,7 @@ async def get_api_key():
 
 def load_model_artifacts(symbol: str):
     """Load trained model artifacts"""
-    model_dir = f"models/{symbol}"
+    model_dir = f"LSTM_models/{symbol}"
     
     if not os.path.exists(model_dir):
         raise HTTPException(
@@ -33,10 +33,10 @@ def load_model_artifacts(symbol: str):
             return model_cache[cache_key], scaler_cache[cache_key], feature_cache[cache_key]
         
         # Load from disk
-        model = tf.keras.models.load_model(f"{model_dir}/lstm_model.h5")
+        model = tf.keras.models.load_model(f"{model_dir}/lstm_model.h5", compile=False)
         scaler = joblib.load(f"{model_dir}/scaler.pkl")
         feature_columns = joblib.load(f"{model_dir}/feature_columns.pkl")
-        
+        print(model.summary())  # Debugging line
         # Cache for future use
         model_cache[cache_key] = model
         scaler_cache[cache_key] = scaler
